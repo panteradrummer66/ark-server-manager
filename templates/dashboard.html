@@ -1,0 +1,256 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <title>Dashboard - Ark Server Admin</title>
+    <style>
+        body {
+            background-color: #1a1a1a;
+            color: #fafafa;
+            font-family: 'Segoe UI', Arial, sans-serif;
+            margin: 0; padding: 0;
+        }
+        .container {
+            max-width: 900px;
+            margin: 30px auto;
+            background: #292929;
+            border-radius: 12px;
+            box-shadow: 0 8px 32px rgba(0,0,0,0.3);
+            padding: 30px;
+        }
+        h2 {
+            color: #ff3c41;
+            letter-spacing: 2px;
+        }
+        .server-box {
+            background: #232026;
+            margin-bottom: 2rem;
+            padding: 1rem 1.5rem 1.5rem 1.5rem;
+            border-radius: 10px;
+            box-shadow: 0 2px 8px #ff3c4140;
+        }
+        .server-box h3 {
+            margin-top: 0.5em;
+            color: #ff3c41;
+        }
+        .actions {
+            margin-top: 1em;
+        }
+        .btn {
+            padding: 10px 22px;
+            border-radius: 7px;
+            border: none;
+            margin: 3px 6px 3px 0;
+            cursor: pointer;
+            font-weight: bold;
+            font-size: 1em;
+            box-shadow: 0 2px 8px #1111;
+            transition: background 0.18s, color 0.18s;
+        }
+        .btn-start { background: #13c66d; color: #fff; }
+        .btn-start:hover { background: #25e47d; }
+        .btn-stop { background: #ff3c41; color: #fff; }
+        .btn-stop:hover { background: #ff686c; }
+        .btn-restart { background: #fbb040; color: #fff; }
+        .btn-restart:hover { background: #ffca63; }
+        .btn-update {
+    		background: #19b8c8;
+    		color: #fff;
+    		padding: 10px 22px;      /* Match other buttons */
+    		font-weight: bold;
+    		font-size: 1em;          /* Match other buttons */
+    		border-radius: 7px;
+    		border: none;
+    		margin: 3px 6px 3px 0;
+    		cursor: pointer;
+    		box-shadow: 0 2px 8px #1111;
+    		transition: background 0.18s, color 0.18s;
+	}
+
+	.btn-update:hover {
+    	background: #29e3ff;
+	}
+        .btn-edit { background: #2d8cff; color: #fff; }
+        .btn-edit:hover { background: #5baeff; }
+        .btn-delete { background: #202020; color: #ff3c41; border: 1px solid #ff3c41; }
+        .btn-delete:hover { background: #331215; color: #fff; }
+        .logout {
+            float: right;
+            color: #bbb;
+            text-decoration: none;
+            font-size: 1em;
+            margin-bottom: 10px;
+        }
+        .logout:hover { color: #ff3c41; }
+        .add-server-link {
+            color: #fbb040;
+            font-weight: bold;
+            text-decoration: none;
+        }
+        .add-server-link:hover { color: #ff3c41; }
+        ul {
+            list-style: none;
+            padding-left: 0;
+        }
+        .flash { margin: 1em 0; padding: 0.8em; background: #3c1a1e; border-radius: 7px; color: #ffbcbc;}
+        .btn-group {
+            margin-bottom: 1.2em;
+            margin-top: 0.3em;
+        }
+        .edit-group {
+            margin-top: 1.5em !important;
+        }
+        .status-pill {
+            display: inline-block;
+            padding: 4px 16px;
+            border-radius: 30px;
+            font-weight: bold;
+            margin-bottom: 10px;
+            font-size: 1em;
+            transition: background 0.2s, color 0.2s, border 0.2s;
+        }
+        .status-running {
+            background: #13c66d30;
+            color: #13c66d;
+            border: 1px solid #13c66d;
+        }
+        .status-stopped {
+            background: #ff3c4130;
+            color: #ff3c41;
+            border: 1px solid #ff3c41;
+        }
+        #update-overlay {
+            display:none; position:fixed; top:0;left:0;width:100vw;height:100vh; background:rgba(30,18,25,0.86); z-index:1000; align-items:center; justify-content:center;
+        }
+        .lds-dual-ring {
+          display: inline-block;
+          width: 64px;
+          height: 64px;
+        }
+        .lds-dual-ring:after {
+          content: " ";
+          display: block;
+          width: 46px;
+          height: 46px;
+          margin: 1px;
+          border-radius: 50%;
+          border: 6px solid #19b8c8;
+          border-color: #19b8c8 transparent #19b8c8 transparent;
+          animation: lds-dual-ring 1.2s linear infinite;
+        }
+        @keyframes lds-dual-ring {
+          0% { transform: rotate(0deg);}
+          100% { transform: rotate(360deg);}
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <a href="{{ url_for('logout') }}" class="logout">Logout</a>
+        <h2>Ark Server Dashboard</h2>
+        {% if current_user.role == 'admin' %}
+        <a href="{{ url_for('add_server') }}" class="add-server-link">+ Add New Server</a>
+        {% endif %}
+        <hr style="border:1px solid #ff3c41;">
+        {% for server in servers %}
+            {% set i = loop.index0 %}
+            <div class="server-box">
+                <h3>{{ server.name }}</h3>
+                <span id="status-pill-{{ i }}" class="status-pill {% if statuses[i] == 'running' %}status-running{% else %}status-stopped{% endif %}">
+                    <span id="status-dot-{{ i }}">
+                    {% if statuses[i] == "running" %}
+                        &#9679; Running
+                    {% else %}
+                        &#9679; Stopped
+                    {% endif %}
+                    </span>
+                </span>
+                <ul>
+                    <li><b>Folder:</b> {{ server.folder }}</li>
+                    <li><b>Start Script:</b> {{ server.start_script }}</li>
+                    <li><b>Stop Script:</b> {{ server.stop_script }}</li>
+                </ul>
+                <div class="actions btn-group">
+                    <a href="{{ url_for('server_control', server_idx=i, action='start') }}" class="btn btn-start">Start</a>
+                    <a href="{{ url_for('server_control', server_idx=i, action='stop') }}" class="btn btn-stop">Stop</a>
+                    <a href="{{ url_for('server_control', server_idx=i, action='restart') }}" class="btn btn-restart">Restart</a>
+                    <button type="button" class="btn btn-update" onclick='runUpdate({{ i }}, {{ server.name|tojson }})'>Update</button>
+                </div>
+                <div class="actions btn-group edit-group">
+                    <a href="{{ url_for('edit_ini', server_idx=i, which='game') }}" class="btn btn-edit">Edit Game.ini</a>
+                    <a href="{{ url_for('edit_ini', server_idx=i, which='gameusersettings') }}" class="btn btn-edit">Edit GameUserSettings.ini</a>
+                    {% if current_user.role == 'admin' %}
+                        <form action="{{ url_for('delete_server', server_idx=i) }}" method="post" style="display:inline;">
+                            <button type="submit" class="btn btn-delete">Delete</button>
+                        </form>
+                    {% endif %}
+                </div>
+            </div>
+        {% else %}
+            <p>No servers defined yet!</p>
+        {% endfor %}
+        {% with messages = get_flashed_messages() %}
+          {% if messages %}
+            <div class="flash">{% for message in messages %}{{ message }}<br>{% endfor %}</div>
+          {% endif %}
+        {% endwith %}
+    </div>
+    <div id="update-overlay">
+        <div style="text-align:center;">
+            <div class="lds-dual-ring"></div>
+            <div id="update-message" style="margin-top:20px;font-size:1.3em;color:#fff;"></div>
+        </div>
+    </div>
+    <script>
+    function runUpdate(idx, name) {
+        var overlay = document.getElementById('update-overlay');
+        var msg = document.getElementById('update-message');
+        msg.innerHTML = "Updating <b>" + name + "</b>...<br>Please wait.";
+        overlay.style.display = "flex";
+        fetch('/api/server_update/' + idx, {
+            method: "POST",
+            headers: {"X-Requested-With": "XMLHttpRequest"}
+        }).then(resp => resp.json()).then(data => {
+            if(data.success) {
+                msg.innerHTML = "<b style='color:#13c66d;'>" + data.msg + "</b>";
+            } else {
+                msg.innerHTML = "<b style='color:#ff3c41;'>" + data.msg + "</b>";
+            }
+            setTimeout(function() {
+                overlay.style.display = "none";
+                window.location.reload();
+            }, 2500);
+        }).catch(err => {
+            msg.innerHTML = "<b style='color:#ff3c41;'>Update failed: " + err + "</b>";
+            setTimeout(function() {
+                overlay.style.display = "none";
+            }, 2500);
+        });
+    }
+
+    function updateStatuses() {
+        fetch('/api/server_status', {
+            method: "GET",
+            headers: {"X-Requested-With": "XMLHttpRequest"}
+        })
+        .then(resp => resp.json())
+        .then(data => {
+            if (!data.statuses) return;
+            data.statuses.forEach(function(status, i) {
+                let pill = document.getElementById('status-pill-' + i);
+                let dot = document.getElementById('status-dot-' + i);
+                if (pill && dot) {
+                    if (status === "running") {
+                        pill.className = "status-pill status-running";
+                        dot.innerHTML = "&#9679; Running";
+                    } else {
+                        pill.className = "status-pill status-stopped";
+                        dot.innerHTML = "&#9679; Stopped";
+                    }
+                }
+            });
+        });
+    }
+    setInterval(updateStatuses, 7000);
+    </script>
+</body>
+</html>
