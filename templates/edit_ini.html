@@ -1,0 +1,25 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <title>Edit {{ inifile }} - {{ server.name }}</title>
+</head>
+<body>
+    <h2>Edit {{ inifile }} for {{ server.name }}</h2>
+    <form method="post">
+        {% for section in config.sections() %}
+            <h3>[{{ section }}]</h3>
+            {% for key, value in config[section].items() %}
+                <label>{{ key }}:</label>
+                <input name="{{ section }}__{{ key }}" value="{{ value }}"><br>
+            {% endfor %}
+        {% endfor %}
+        <button type="submit">Save</button>
+    </form>
+    <a href="{{ url_for('dashboard') }}">Back to Dashboard</a>
+    {% with messages = get_flashed_messages() %}
+      {% if messages %}
+        <ul>{% for message in messages %}<li>{{ message }}</li>{% endfor %}</ul>
+      {% endif %}
+    {% endwith %}
+</body>
+</html>

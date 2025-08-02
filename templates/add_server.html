@@ -1,0 +1,19 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <title>Add ARK Server</title>
+</head>
+<body>
+    <h2>Add New ARK Server</h2>
+    <form method="post">
+        <label>Name:</label><input name="name" required><br>
+        <label>Folder:</label><input name="folder" required><br>
+        <label>Start Script:</label><input name="start_script" required><br>
+        <label>Stop Script:</label><input name="stop_script" required><br>
+        <label>Game.ini path:</label><input name="game_ini" required><br>
+        <label>GameUserSettings.ini path:</label><input name="gameusersettings_ini" required><br>
+        <button type="submit">Add Server</button>
+    </form>
+    <a href="{{ url_for('dashboard') }}">Back to Dashboard</a>
+</body>
+</html>

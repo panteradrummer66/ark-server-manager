@@ -1,0 +1,10 @@
+[
+  {
+    "name": "JadeKatieScortched",
+    "folder": "C:\\ARK\\Servers\\ARK_SA\\JadeKatieScortched",
+    "start_script": "start_jadekatiescorched.bat",
+    "stop_script": "stop.bat",
+    "game_ini": "C:\\ARK\\Servers\\ARK_SA\\JadeKatieScortched\\ShooterGame\\Saved\\Config\\WindowsServer\\Game.ini",
+    "gameusersettings_ini": "C:\\ARK\\Servers\\ARK_SA\\JadeKatieScortched\\ShooterGame\\Saved\\Config\\WindowsServer\\GameUserSettings.ini"
+  }
+]
